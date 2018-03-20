@@ -19,8 +19,10 @@ router.post('/', (req, res, next) => {
     }
     else {
       if (bcrypt.compareSync(password, user.password)) {
+        const token = jwt.sign(user, 'secret');
         res.json({
-          message: 'Login Successful'
+          message: 'Login Successful',
+          token
         });
       } else {
         const error = new Error('Passwords do not match.');

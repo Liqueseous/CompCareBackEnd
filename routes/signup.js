@@ -28,8 +28,10 @@ router.post('/', (req, res, next) => {
           error.status = 400;
           next(error);
         } else {
+          const token = jwt.sign(user, 'secret');
           res.json({
-            message: 'Signup Successful'
+            message: 'Signup Successful',
+            token
           });
         }
       });
