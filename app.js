@@ -1,26 +1,46 @@
-//afternoon-waters-42339
-//lets require/import the mongodb native drivers.
-var mongodb = require('mongodb');
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const mongoose = require('mongoose');
 
-//We need to work with "MongoClient" interface in order to connect to a mongodb server.
-var MongoClient = mongodb.MongoClient;
+require('dotenv').config();
 
-// Connection URL. This is where your mongodb server is running.
+// Set up App
+const app = express();
 
-//(Focus on This Variable)
-var url = process.env.COMPCARE_DB;     
-//(Focus on This Variable)
+// Connect to the database
+mongoose.connect(process.env.COMPCARE_DB);
 
-// Use connect method to connect to the Server
-  MongoClient.connect(url, function (err, db) {
-  if (err) {
-    console.log('Unable to connect to the mongoDB server. Error:', err);
-  } else {
-    console.log('Connection established to', url);
+// Set up BodyParser Middleware
+app.use(bodyParser.urlencoded({extended: false }));
+app.use(bodyParser.json());
 
-    // do some work here with the database.
+// Set up CORS Middleware
+app.use(cors());
 
-    //Close connection
-    db.close();
-  }
+// Bring in Signup route
+const signup = require('./routes/signup');
+
+// Bring in Login route
+const login = require('./routes/login');
+
+// Use signup route
+app.use('/signup', signup);
+
+// Use login route
+app.use('/login', login);
+
+app.use('/', (req, res, next) => {
+  const error = new Error('Not Found');
+  error.status = 404;
+  next(error);
 });
+
+app.use((error, req, res, next) => {
+  res.status(error.status || 500);
+  res.json({
+    message: error.message
+  });
+});
+
+module.exports = app;
