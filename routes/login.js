@@ -10,13 +10,12 @@ router.post('/', (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({email: email}, (err, user) => {
     if (err) {
-      console.log(err);
-      return;
+      next(err);
     } else 
     if (!user) {
-      res.status(404).json({
-        message: 'No User by this Email'
-      });
+      const error = new Error('No User by this Email');
+      error.stack = 404;
+      next(error);
     }
     else {
       if (bcrypt.compareSync(password, user.password)) {
@@ -24,9 +23,9 @@ router.post('/', (req, res, next) => {
           message: 'Login Successful'
         });
       } else {
-        res.json({
-          message: 'Passwords do not match.'
-        });
+        const error = new Error('Passwords do not match.');
+        error.stack = 400;
+        next(error);
       }
     }
   });
