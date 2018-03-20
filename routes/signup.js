@@ -6,16 +6,15 @@ const jwt = require('jsonwebtoken');
 // Bring in User model
 const User = require('../models/user');
 
-router.post('/', (req, res) => {
+router.post('/', (req, res, next) => {
   const { name, email, password } = req.body;
   User.findOne({ email }, (err, user) => {
     if (err) {
       console.log(err);
-      return;
     } else if (user) {
-      return res.status(400).json({
-        message: 'User by that email already exists'
-      });
+      const error = new Error('User by that email already exists');
+      error.status = 400;
+      next(error);
     }
     else {
       const user = new User({
@@ -25,11 +24,14 @@ router.post('/', (req, res) => {
       });
       user.save((err) => {
         if (err) {
-          console.log(err);
-          return;
+          const error = new Error('You missed a field');
+          error.status = 400;
+          next(error);
         } else {
+          const token = jwt.sign(user, 'secret');
           res.json({
-            message: 'Signup Successful'
+            message: 'Signup Successful',
+            token
           });
         }
       });
