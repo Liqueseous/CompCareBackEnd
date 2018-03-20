@@ -19,16 +19,15 @@ router.post('/', (req, res, next) => {
       });
     }
     else {
-      bcrypt.compare(password, user.password, (err, result) => {
-        if (err) {
-          res.json({
-            message: 'Wrong Password'
-          });
-        } else {
-          token = jwt.sign({user: user}, 'secretkey');
-          res.json({token});
-        }
-      });
+      if (bcrypt.compareSync(password, user.password)) {
+        res.json({
+          message: 'Login Successful'
+        });
+      } else {
+        res.json({
+          message: 'Passwords do not match.'
+        });
+      }
     }
   });
 });

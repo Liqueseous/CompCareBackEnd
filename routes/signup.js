@@ -28,8 +28,9 @@ router.post('/', (req, res) => {
           console.log(err);
           return;
         } else {
-          token = jwt.sign({user: user}, 'secretkey');
-          res.json({token});
+          res.json({
+            message: 'Signup Successful'
+          });
         }
       });
     }
