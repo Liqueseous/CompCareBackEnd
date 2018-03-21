@@ -6,7 +6,11 @@ const jwt = require('jsonwebtoken');
 // Bring in User model
 const User = require('../models/user');
 
+const validateInput = require('../validations/login');
+
 router.post('/', (req, res, next) => {
+  let validationStatus = validateInput(req.body);
+  if (!validationStatus.isValid) return res.json(validationStatus.errors);
   const { email, password } = req.body;
   User.findOne({email: email}, (err, user) => {
     if (err) {
@@ -19,8 +23,8 @@ router.post('/', (req, res, next) => {
     }
     else {
       if (bcrypt.compareSync(password, user.password)) {
-        const token = jwt.sign(user, 'secret');
-        res.json({
+        const token = jwt.sign(user.toJSON(), 'secret');
+        return res.json({
           message: 'Login Successful',
           token
         });

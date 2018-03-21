@@ -6,11 +6,15 @@ const jwt = require('jsonwebtoken');
 // Bring in User model
 const User = require('../models/user');
 
+const validateInput = require('../validations/signup');
+
 router.post('/', (req, res, next) => {
+  let validationStatus = validateInput(req.body);
+  if (!validationStatus.isValid) return res.json(validationStatus.errors);
   const { name, email, password } = req.body;
   User.findOne({ email }, (err, user) => {
     if (err) {
-      console.log(err);
+      next(err);
     } else if (user) {
       const error = new Error('User by that email already exists');
       error.status = 400;
@@ -28,8 +32,8 @@ router.post('/', (req, res, next) => {
           error.status = 400;
           next(error);
         } else {
-          const token = jwt.sign(user, 'secret');
-          res.json({
+          const token = jwt.sign(user.toJSON(), 'secret');
+          return res.json({
             message: 'Signup Successful',
             token
           });
