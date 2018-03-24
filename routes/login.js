@@ -18,7 +18,7 @@ router.post('/', (req, res, next) => {
     } else 
     if (!user) {
       const error = new Error('No User by this Email');
-      error.stack = 404;
+      error.status = 404;
       next(error);
     }
     else {
@@ -30,7 +30,7 @@ router.post('/', (req, res, next) => {
         });
       } else {
         const error = new Error('Passwords do not match.');
-        error.stack = 400;
+        error.status = 400;
         next(error);
       }
     }
