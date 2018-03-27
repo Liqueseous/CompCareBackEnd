@@ -10,7 +10,7 @@ const validateInput = require('../validations/login');
 
 router.post('/', (req, res, next) => {
   let validationStatus = validateInput(req.body);
-  if (!validationStatus.isValid) return res.json(validationStatus.errors);
+  if (!validationStatus.isValid) return;
   const { email, password } = req.body;
   User.findOne({email: email}, (err, user) => {
     if (err) {
@@ -23,7 +23,7 @@ router.post('/', (req, res, next) => {
     }
     else {
       if (bcrypt.compareSync(password, user.password)) {
-        const token = jwt.sign(user.toJSON(), 'secret');
+        const token = jwt.sign(user.toJSON(), process.env.JWT_SECRET);
         return res.json({
           message: 'Login Successful',
           token
