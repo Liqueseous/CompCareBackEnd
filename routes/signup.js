@@ -10,7 +10,7 @@ const validateInput = require('../validations/signup');
 
 router.post('/', (req, res, next) => {
   let validationStatus = validateInput(req.body);
-  if (!validationStatus.isValid) return res.json(validationStatus.errors);
+  if (!validationStatus.isValid) return;
   const { name, email, password } = req.body;
   User.findOne({ email }, (err, user) => {
     if (err) {
@@ -32,7 +32,7 @@ router.post('/', (req, res, next) => {
           error.status = 400;
           next(error);
         } else {
-          const token = jwt.sign(user.toJSON(), 'secret');
+          const token = jwt.sign(user.toJSON(), process.env.JWT_SECRET);
           return res.json({
             message: 'Signup Successful',
             token
