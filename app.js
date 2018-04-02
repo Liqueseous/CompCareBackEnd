@@ -24,11 +24,18 @@ const signup = require('./routes/signup');
 // Bring in Login route
 const login = require('./routes/login');
 
+// Bring in Tickets routes
+
+const tickets = require('./routes/tickets');
+
 // Use signup route
 app.use('/signup', signup);
 
 // Use login route
 app.use('/login', login);
+
+// Use tickets routes
+app.use('/tickets', tickets);
 
 app.use('/', (req, res, next) => {
   const error = new Error('Not Found');
