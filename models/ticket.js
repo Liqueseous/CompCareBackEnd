@@ -6,7 +6,7 @@ const TicketSchema = mongoose.Schema({
   status: {type: String, required: true},
   customerName: {type: String, required: true},
   phoneNumber: {type: String, required: true},
-  dateReceived: {type: Date, required: true},
+  dateReceived: {type: String, required: true},
   assignee: {type: String, required: true},
   shortDescription: {type: String, required: true},
   computerMakeNModel: {type: String, required: true},
@@ -17,7 +17,7 @@ const TicketSchema = mongoose.Schema({
   initDiagnosis: {type: String, required: true},
   repairNotes: {type: String, required: true},
   holdReason: {type: String},
-  partsNeeded: {type: [String]},
+  partsNeeded: {type: String},
   resolutionCode: {type: String},
   user: {
     type: mongoose.Schema.Types.ObjectId,

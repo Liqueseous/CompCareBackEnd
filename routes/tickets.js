@@ -1,16 +1,17 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 
 const User = require('../models/user');
 const Ticket = require('../models/ticket');
 
-router.post('/', async (req, res) => {
+router.post('/', async (req, res, next) => {
   const { 
     ticketNumber,
     status,
     customerName,
     phoneNumber,
-    dateRecieved,
+    dateReceived,
     assignee,
     shortDescription,
     computerMakeNModel,
@@ -26,6 +27,14 @@ router.post('/', async (req, res) => {
     userId
   } = req.body;
 
+  const ticket = await Ticket.findOne({ ticketNumber });
+
+  if (ticket) {
+    const error = new Error('Ticket number already used.');
+    error.status = 403;
+    return next(error);
+  }
+
   const user = await User.findById(userId);
   if (user) {
     const newTicket = {
@@ -33,7 +42,7 @@ router.post('/', async (req, res) => {
       status,
       customerName,
       phoneNumber,
-      dateRecieved,
+      dateReceived,
       assignee,
       shortDescription,
       computerMakeNModel,
@@ -46,14 +55,20 @@ router.post('/', async (req, res) => {
       holdReason,
       partsNeeded,
       resolutionCode,
-      userId
+      user
     }
 
     let ticket = await Ticket.create(newTicket);
     ticket = await ticket.save();
+
     user.tickets.push(ticket);
     await user.save();
+
     return res.json(ticket);
   }
-  return res.status(403).json({ errors: 'Must be a registered user to create ticket'} );
+  const error = new Error('Must be a registered user to create ticket.');
+  error.status = 403;
+  return next(error);
 });
+
+module.exports = router;

@@ -25,7 +25,6 @@ const signup = require('./routes/signup');
 const login = require('./routes/login');
 
 // Bring in Tickets routes
-
 const tickets = require('./routes/tickets');
 
 // Use signup route
