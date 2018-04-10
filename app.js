@@ -36,10 +36,8 @@ app.use('/login', login);
 // Use tickets routes
 app.use('/tickets', tickets);
 
-app.use('/', (req, res, next) => {
-  const error = new Error('Not Found');
-  error.status = 404;
-  next(error);
+app.get('/', (req, res) => {
+  res.send('Welcome to CompCare');
 });
 
 app.use((error, req, res, next) => {
