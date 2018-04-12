@@ -24,7 +24,8 @@ router.post('/', (req, res, next) => {
       const user = new User({
         name,
         email,
-        password: bcrypt.hashSync(password, 10)
+        password: bcrypt.hashSync(password, 10),
+        numTickets: 0,
       });
       user.save((err) => {
         if (err) {

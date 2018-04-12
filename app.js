@@ -24,16 +24,20 @@ const signup = require('./routes/signup');
 // Bring in Login route
 const login = require('./routes/login');
 
+// Bring in Tickets routes
+const tickets = require('./routes/tickets');
+
 // Use signup route
 app.use('/signup', signup);
 
 // Use login route
 app.use('/login', login);
 
-app.use('/', (req, res, next) => {
-  const error = new Error('Not Found');
-  error.status = 404;
-  next(error);
+// Use tickets routes
+app.use('/tickets', tickets);
+
+app.get('/', (req, res) => {
+  res.send('Welcome to CompCare');
 });
 
 app.use((error, req, res, next) => {
