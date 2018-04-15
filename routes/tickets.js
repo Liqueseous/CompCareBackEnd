@@ -60,7 +60,14 @@ router.post('/:ticketNumber', async (req, res, next) => {
     }
 
     let ticket = await Ticket.create(newTicket);
-    ticket = await ticket.save();
+
+    if (ticket) {
+      ticket = await ticket.save();
+    } else {
+      const error = new Error('Could not save ticket, must be missing values.');
+      error.status = 400;
+      next(error);
+    }
 
     user.tickets.push(ticket);
     user.numTickets++;
@@ -69,7 +76,7 @@ router.post('/:ticketNumber', async (req, res, next) => {
     return res.json(ticket);
   }
   const error = new Error('Must be a registered user to create ticket.');
-  error.status = 403;
+  error.status = 400;
   return next(error);
 });
 
@@ -103,11 +110,11 @@ router.put('/:ticketNumber', async (req, res, next) => {
       return res.json(updatedTicket);
     }
     const error = new Error('Could not find ticket');
-    error.status = 403;
+    error.status = 404;
     return next(error);
   }
   const error = new Error('Must be a registered user to update ticket.');
-  error.status = 403;
+  error.status = 400;
   return next(error);
 })
 
@@ -121,12 +128,12 @@ router.get('/', async (req, res, next) => {
       return res.send(tickets);
     } else {
       const error = new Error('User has no tickets');
-      error.status = 403;
+      error.status = 404;
       return next(error);
     }
   }
   const error = new Error('Must be a registered user to create ticket.');
-  error.status = 403;
+  error.status = 400;
   return next(error);
 });
 
@@ -144,16 +151,16 @@ router.get('/:ticketNumber', async (req, res, next) => {
         }
       }
       const error = new Error(`User doesn't have a ticket with number ${ticketNumber}`);
-      error.status = 403;
+      error.status = 404;
       return next(error);
     } else {
       const error = new Error('User has no tickets');
-      error.status = 403;
+      error.status = 404;
       return next(error);
     }
   }
   const error = new Error('no user by this id');
-  error.status = 403;
+  error.status = 404;
   return next(error);
 })
 
