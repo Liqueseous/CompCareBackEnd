@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 
 require('dotenv').config();
 
@@ -32,6 +33,14 @@ app.use('/signup', signup);
 
 // Use login route
 app.use('/login', login);
+
+// jwt decoding middleware
+app.use((req, res, next) => {
+  const token = req.headers.authorization;
+  tokendata = jwt.verify(token, process.env.JWT_SECRET);
+  req.userData = tokendata;
+  next();
+});
 
 // Use tickets routes
 app.use('/tickets', tickets);

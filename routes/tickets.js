@@ -5,9 +5,11 @@ const mongoose = require('mongoose');
 const User = require('../models/user');
 const Ticket = require('../models/ticket');
 
-router.post('/', async (req, res, next) => {
-  const { 
-    ticketNumber,
+router.post('/:ticketNumber', async (req, res, next) => {
+  const { userData } = req;
+  const { ticketNumber } = req.params;
+  const userId = userData._id;
+  const {
     status,
     customerName,
     phoneNumber,
@@ -24,7 +26,6 @@ router.post('/', async (req, res, next) => {
     holdReason,
     partsNeeded,
     resolutionCode,
-    userId
   } = req.body;
 
   const ticket = await Ticket.findOne({ ticketNumber });
@@ -59,7 +60,14 @@ router.post('/', async (req, res, next) => {
     }
 
     let ticket = await Ticket.create(newTicket);
-    ticket = await ticket.save();
+
+    if (ticket) {
+      ticket = await ticket.save();
+    } else {
+      const error = new Error('Could not save ticket, must be missing values.');
+      error.status = 400;
+      next(error);
+    }
 
     user.tickets.push(ticket);
     user.numTickets++;
@@ -68,12 +76,14 @@ router.post('/', async (req, res, next) => {
     return res.json(ticket);
   }
   const error = new Error('Must be a registered user to create ticket.');
-  error.status = 403;
+  error.status = 400;
   return next(error);
 });
 
-router.put('/:userId/:ticketNumber', async (req, res, next) => {
-  const { userId, ticketNumber } = req.params;
+router.put('/:ticketNumber', async (req, res, next) => {
+  const { userData } = req;
+  const { ticketNumber } = req.params;
+  const userId = userData._id;
   const ticketData = { 
     status,
     customerName,
@@ -100,16 +110,17 @@ router.put('/:userId/:ticketNumber', async (req, res, next) => {
       return res.json(updatedTicket);
     }
     const error = new Error('Could not find ticket');
-    error.status = 403;
+    error.status = 404;
     return next(error);
   }
   const error = new Error('Must be a registered user to update ticket.');
-  error.status = 403;
+  error.status = 400;
   return next(error);
 })
 
-router.get('/:userId', async (req, res, next) => {
-  const { userId } = req.params;
+router.get('/', async (req, res, next) => {
+  const { userData } = req;
+  const userId = userData._id;
   const user = await User.findById(userId);
   if (user) {
     const tickets = await Ticket.find({ user });
@@ -117,17 +128,19 @@ router.get('/:userId', async (req, res, next) => {
       return res.send(tickets);
     } else {
       const error = new Error('User has no tickets');
-      error.status = 403;
+      error.status = 404;
       return next(error);
     }
   }
   const error = new Error('Must be a registered user to create ticket.');
-  error.status = 403;
+  error.status = 400;
   return next(error);
 });
 
-router.get('/:userId/:ticketNumber', async (req, res, next) => {
-  const { userId, ticketNumber } = req.params;
+router.get('/:ticketNumber', async (req, res, next) => {
+  const { userData } = req;
+  const { ticketNumber } = req.params;
+  const userId = userData._id;
   const user = await User.findById(userId);
   if (user) {
     const tickets = await Ticket.find({ user });
@@ -135,20 +148,19 @@ router.get('/:userId/:ticketNumber', async (req, res, next) => {
       for (let i = 0; i < tickets.length; i++) {
         if (tickets[i].ticketNumber === ticketNumber) {
           return res.json(tickets[i]);
-        } else {
-          const error = new Error(`User doesn't have a ticket with number ${ticketNumber}`);
-          error.status = 403;
-          return next(error);
         }
       }
+      const error = new Error(`User doesn't have a ticket with number ${ticketNumber}`);
+      error.status = 404;
+      return next(error);
     } else {
       const error = new Error('User has no tickets');
-      error.status = 403;
+      error.status = 404;
       return next(error);
     }
   }
-  const error = new Error('no user by thi id');
-  error.status = 403;
+  const error = new Error('no user by this id');
+  error.status = 404;
   return next(error);
 })
 
