@@ -28,16 +28,15 @@ router.post('/:ticketNumber', async (req, res, next) => {
     resolutionCode,
   } = req.body;
 
-  const ticket = await Ticket.findOne({ ticketNumber });
-
-  if (ticket) {
-    const error = new Error('Ticket number already used.');
-    error.status = 403;
-    return next(error);
-  }
-
   const user = await User.findById(userId);
+
   if (user) {
+    const ticket = await Ticket.findOne({ ticketNumber, user });
+    if (ticket) {
+      const error = new Error('Ticket number already used.');
+      error.status = 403;
+      return next(error);
+    }
     const newTicket = {
       ticketNumber,
       status,
@@ -58,22 +57,21 @@ router.post('/:ticketNumber', async (req, res, next) => {
       resolutionCode,
       user
     }
+    let new_ticket = await Ticket.create(newTicket);
 
-    let ticket = await Ticket.create(newTicket);
-
-    if (ticket) {
-      ticket = await ticket.save();
+    if (new_ticket) {
+      new_ticket = await new_ticket.save();
     } else {
       const error = new Error('Could not save ticket, must be missing values.');
       error.status = 400;
       next(error);
     }
 
-    user.tickets.push(ticket);
+    user.tickets.push(new_ticket);
     user.numTickets++;
     await user.save();
 
-    return res.json(ticket);
+    return res.json(new_ticket);
   }
   const error = new Error('Must be a registered user to create ticket.');
   error.status = 400;
